@@ -16,8 +16,6 @@ module.exports = function Model(fileName) {
 	};
 
 	this.findOne = async (id) => {
-		console.log("doing a findone");
-
 		const nodes = await this.find(),
 			node = nodes.find((r) => r.id === id);
 

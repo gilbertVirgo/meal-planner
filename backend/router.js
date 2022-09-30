@@ -17,12 +17,17 @@ router.get("/recipe/:id", async ({ params }, res, next) => {
 router.get("/recipe/:id/ingredients", async ({ params }, res, next) => {
 	const recipe = await Recipe.findOne(params.id).catch(next);
 	res.locals.data = await Ingredient.find(recipe.ingredients);
-
 	next();
 });
 
 router.get("/ingredients", async (req, res, next) => {
 	res.locals.data = await Ingredient.find().catch(next);
+	next();
+});
+
+router.put("/ingredients", async ({ body }, res, next) => {
+	await Ingredient.insertOne(body);
+	res.locals.data = undefined;
 	next();
 });
 
