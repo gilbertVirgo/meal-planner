@@ -1,4 +1,8 @@
 const Model = require("../Model");
-const path = require("path");
 
-module.exports = new Model("ingredients.json");
+let title, lastUsedUnit;
+
+module.exports = new Model("ingredients.json", {
+	title,
+	lastUsedUnit,
+});

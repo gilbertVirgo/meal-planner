@@ -1,7 +1,8 @@
 import customFetch from "./customFetch";
 
-export default async (route) =>
+export default async (route, body) =>
 	customFetch({
-		method: "GET",
+		method: "PUT",
 		route,
+		body,
 	});

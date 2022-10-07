@@ -1,37 +1,89 @@
-import React from "react";
+import Alert from "react-bootstrap/Alert";
+import Button from "react-bootstrap/Button";
+import Form from "react-bootstrap/Form";
+import Header from "../components/Header";
 import IngredientsBrowser from "../components/IngredientsBrowser";
+import React from "react";
+import Section from "../components/Section";
+import Spinner from "react-bootstrap/Spinner";
+import put from "../api/put";
+import { useHistory } from "react-router-dom";
 
 export default () => {
-	const [ingredient, setIngredients] = React.useState([]);
+	const [title, setTitle] = React.useState("");
+	const [chosenIngredients, setChosenIngredients] = React.useState([]);
+	const [errorMessage, setErrorMessage] = React.useState("");
+	const [loading, setLoading] = React.useState(false);
+
+	const history = useHistory();
+	const isFormFilled = () => title !== "" && chosenIngredients.length > 0;
+
+	// when posting, remember ingredients -> ingredientIds
+	const handleSubmit = (event) => {
+		event.preventDefault();
+
+		if (event.target.checkValidity() && isFormFilled()) {
+			setLoading(true);
+
+			put("recipe", {
+				title,
+				ingredients: chosenIngredients.map(({ id, amount, unit }) => ({
+					id,
+					amount,
+					unit,
+				})),
+			})
+				.then(() => history.push("/success/new-recipe"))
+				.catch((err) => setErrorMessage(err.toString()))
+				.finally(() => setLoading(false));
+		} else {
+			setErrorMessage("Please fill out all the fields.");
+		}
+	};
 
 	React.useEffect(() => {
-		(async function () {
-			const { data: ingredients } = await (
-				await fetch("http://localhost:5000/ingredients")
-			).json;
-
-			setIngredients(ingredients);
-		})();
-	});
+		setErrorMessage("");
+	}, [title, chosenIngredients]);
 
 	return (
-		<React.Fragment>
-			<h1>New Recipe</h1>
+		<Form onSubmit={handleSubmit}>
+			<Header>New Recipe</Header>
 
-			<p>Title</p>
-			<input name="title" />
-			<p>Ingredients</p>
-			<input name="ingredients" />
+			<Section>
+				<Form.Label>Title</Form.Label>
+				<Form.Control
+					value={title}
+					onChange={({ target: { value } }) => setTitle(value)}
+					name="title"
+					required
+				/>
+			</Section>
 
-			<IngredientsBrowser />
-			{/* This has to be more intelligent 
-            than a datalist if she is going to 
-            actually use it. 
-            
-            Will need to be something really
-            intuitive. Something with the option
-            to easily add a new ingredient if
-            necessary.*/}
-		</React.Fragment>
+			<Section>
+				<Form.Label>Ingredients</Form.Label>
+				<IngredientsBrowser
+					chosenIngredients={chosenIngredients}
+					onChange={setChosenIngredients}
+				/>
+			</Section>
+
+			<Section>
+				<Button disabled={errorMessage || loading} type="submit">
+					{loading ? (
+						<Spinner
+							as="span"
+							animation="grow"
+							size="sm"
+							role="status"
+							aria-hidden="true"
+						/>
+					) : (
+						"Create new recipe"
+					)}
+				</Button>
+			</Section>
+
+			{errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+		</Form>
 	);
 };

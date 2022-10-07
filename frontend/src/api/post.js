@@ -1,15 +1,8 @@
-const baseURL = "http://localhost:5000";
+import customFetch from "./customFetch";
 
-export default async (route, body) => {
-	const { data, success } = await (
-		await fetch(`${baseURL}/${route}`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(body),
-		})
-	).json();
-
-	return data;
-};
+export default async (route, body) =>
+	customFetch({
+		method: "POST",
+		route,
+		body,
+	});
